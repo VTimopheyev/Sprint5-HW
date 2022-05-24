@@ -36,15 +36,12 @@ public interface TaskManager {
 
     void updateSubtask(Subtask updatedSubtask);
 
-    Object getIssueById(int id);
+    Task getIssueById(int id);
 
     void deleteIssueById(int id);
 
     void removeAllRelatedSubtasks(int epicId);
 
-    void save();
-
-    void loadFromFile();
 }
 
 

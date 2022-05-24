@@ -6,14 +6,10 @@ public class Test {
     TaskManager taskManager;
 
     public void loadingFromFile() {
-        TaskManager taskManager = Managers.getDefault("sources/test.csv");
-        this.taskManager = taskManager;
-        taskManager.loadFromFile();
+        taskManager = FileBackedTasksManager.loadFromFile("sources/test.csv");
     }
 
-
     public void createIssues() {
-
 
         TaskManager taskManager = Managers.getDefault("sources/test.csv");
         Task task1 = new Task("First task", "Very first task");
@@ -35,7 +31,6 @@ public class Test {
         this.taskManager = taskManager;
         System.out.println(taskManager);
         System.out.println(taskManager.getTasks());
-        taskManager.save();
     }
 
     public void updateIssues() {

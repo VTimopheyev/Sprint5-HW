@@ -69,7 +69,34 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
         }
     }
 
-    public void loadFromFile() {
+    public static FileBackedTasksManager loadFromFile(String filePath) {
+        FileBackedTasksManager tasksManager = new FileBackedTasksManager(filePath);
+        try {
+            File file = new File(filePath);
+            FileReader fr = new FileReader(file);
+            BufferedReader reader = new BufferedReader(fr);
+            reader.readLine();
+            String line;
+            String lineWithHistory;
+
+            while (true) {
+                line = reader.readLine();
+                if (line.length() == 0) {
+                    lineWithHistory = reader.readLine();
+                    tasksManager.restoreHistory(lineWithHistory);
+                    break;
+                }
+                tasksManager.stringToIssue(line);
+            }
+            reader.close();
+            tasksManager.restoreIdCount();
+        } catch (IOException e) {
+            throw new ManagerSaveException(e.getMessage());
+        }
+        return tasksManager;
+    }
+
+    /*public void loadFromFile() {
         try {
             File file = new File(filePath);
             FileReader fr = new FileReader(file);
@@ -92,9 +119,9 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
         } catch (IOException e) {
             throw new ManagerSaveException(e.getMessage());
         }
-    }
+    }*/
 
-    public void stringToIssue(String line) {
+    private void stringToIssue(String line) {
         String[] splittedLine = line.split(",");
         //System.out.println(splittedLine[1]);
         IssueType type = checkType(splittedLine[1]);
@@ -117,7 +144,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
         }
     }
 
-    public IssueType checkType(String value) {
+    private IssueType checkType(String value) {
         IssueType type = null;
         switch (value) {
             case "TASK":
@@ -133,7 +160,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
         return type;
     }
 
-    public IssueStatus checkStatus(String value) {
+    private IssueStatus checkStatus(String value) {
         IssueStatus status = IssueStatus.NONE;
         switch (value) {
             case "IN_PROGRESS":
@@ -149,7 +176,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
         return status;
     }
 
-    public void restoreIdCount() {
+    private void restoreIdCount() {
         int idCount = 0;
         for (int id : tasks.keySet()) {
             if (id > idCount) {
@@ -169,7 +196,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
         this.idCount = idCount;
     }
 
-    public void restoreHistory(String lineWithHistory) {
+    private void restoreHistory(String lineWithHistory) {
         String[] savedHistory = lineWithHistory.split(",");
         for (String idAsString : savedHistory) {
             int id = Integer.parseInt(idAsString);
@@ -178,7 +205,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
     }
 
 
-    static String historyToString(HistoryManager manager) {
+    private String historyToString(HistoryManager manager) {
         StringBuilder sb = new StringBuilder();
         List<Task> history = manager.getHistory();
         for (Task task : history) {
@@ -232,9 +259,9 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
 
     @Override
     public Task getIssueById(int id) {
-        super.getIssueById(id);
+        Task task = super.getIssueById(id);
         save();
-        return super.getIssueById(id);
+        return task;
     }
 
     @Override
